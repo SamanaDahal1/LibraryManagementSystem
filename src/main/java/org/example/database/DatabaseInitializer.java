@@ -27,6 +27,7 @@ public class DatabaseInitializer {
             try (Connection connection1 =DatabaseConnection.getConnection())
             {
                 createBooksTable(connection1);
+                createMembersTable(connection1);
             }
         }
         catch (SQLException | IOException e) {
@@ -39,6 +40,12 @@ public class DatabaseInitializer {
         String createBook ="create table if not exists books (book_id int primary key auto_increment,title varchar(100) not null,author varchar(100) not null,category varchar(50),total_copies int not null,available_copies int not null)";
         try( Statement statement = connection.createStatement()) {
             statement.executeUpdate(createBook);
+        }
+    }
+    private void createMembersTable(Connection connection)throws SQLException{
+        String createMember="create table if not exists members(member_id int primary key auto_increment,name varchar(100) not null,email varchar(100) not null unique, phone varchar(20))";
+        try(Statement statement = connection.createStatement()) {
+            statement.executeUpdate(createMember);
         }
     }
 }
