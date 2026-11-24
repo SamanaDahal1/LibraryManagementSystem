@@ -4,13 +4,12 @@ import org.example.dao.BookDAO;
 import org.example.database.DatabaseConnection;
 import org.example.model.Book;
 
-import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BookDAOImpl implements BookDAO {
     @Override
@@ -44,16 +43,15 @@ public class BookDAOImpl implements BookDAO {
             preparedStatement.setInt(1,bookId);
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 if (resultSet.next()){
-                   Book book = new Book(
-                            resultSet.getInt("book_id"),
-                            resultSet.getString("title"),
-                            resultSet.getString("author"),
-                            resultSet.getString("category"),
-                            resultSet.getInt("total_copies"),
-                            resultSet.getInt("available_copies")
+                    return new Book(
+                             resultSet.getInt("book_id"),
+                             resultSet.getString("title"),
+                             resultSet.getString("author"),
+                             resultSet.getString("category"),
+                             resultSet.getInt("total_copies"),
+                             resultSet.getInt("available_copies")
 
-                    );
-                    return book;
+                     );
                 }
             }
         }
@@ -65,7 +63,30 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public List<Book> getAllBooks() {
-        return List.of();
+        ArrayList<Book> books = new ArrayList<>();
+        String getAllBook = "select * from books";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getAllBook);
+             ResultSet resultSet = preparedStatement.executeQuery())
+        {
+            while (resultSet.next()){
+                Book book =  new Book(
+                        resultSet.getInt("book_id"),
+                        resultSet.getString("title"),
+                        resultSet.getString("author"),
+                        resultSet.getString("category"),
+                        resultSet.getInt("total_copies"),
+                        resultSet.getInt("available_copies")
+
+                );
+              books.add(book);
+            }
+            return books;
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while retrieving all books: "+e.getMessage());
+        }
+        return books;
     }
 
     @Override
