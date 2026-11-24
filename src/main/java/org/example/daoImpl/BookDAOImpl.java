@@ -4,8 +4,10 @@ import org.example.dao.BookDAO;
 import org.example.database.DatabaseConnection;
 import org.example.model.Book;
 
+import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +37,30 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public Book getBookById(int bookId) {
-        return null;
+        String getBook = "select * from books where book_id = ?";
+        try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(getBook))
+        {
+            preparedStatement.setInt(1,bookId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                   Book book = new Book(
+                            resultSet.getInt("book_id"),
+                            resultSet.getString("title"),
+                            resultSet.getString("author"),
+                            resultSet.getString("category"),
+                            resultSet.getInt("total_copies"),
+                            resultSet.getInt("available_copies")
+
+                    );
+                    return book;
+                }
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while retrieving book detail through id: "+e.getMessage());
+        }
+        return  null;
     }
 
     @Override
