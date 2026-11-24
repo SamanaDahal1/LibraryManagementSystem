@@ -91,6 +91,24 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public boolean updateBook(Book book) {
+        String updateBook ="update books set title =?,author=?,category=?,total_copies=?,available_copies=? where book_id=?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(updateBook))
+        {
+            preparedStatement.setString(1,book.getTitle());
+            preparedStatement.setString(2,book.getAuthor());
+            preparedStatement.setString(3,book.getCategory());
+            preparedStatement.setInt(4,book.getTotalCopies());
+            preparedStatement.setInt(5,book.getAvailableCopies());
+            preparedStatement.setInt(6,book.getBookId());
+            int rowAffected = preparedStatement.executeUpdate();
+            if(rowAffected!=0){
+                return true;
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while updating book: "+e.getMessage());
+        }
         return false;
     }
 
