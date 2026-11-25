@@ -3,11 +3,15 @@ package org.example.daoImpl;
 import org.example.dao.BorrowDAO;
 import org.example.database.DatabaseConnection;
 import org.example.model.BorrowRecord;
-
+import java.sql.Date;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
+
 
 public class BorrowDAOImpl implements BorrowDAO {
     @Override
@@ -34,6 +38,33 @@ public class BorrowDAOImpl implements BorrowDAO {
 
     @Override
     public BorrowRecord getBorrowRecordById(int borrowId) {
+        String getById = "select * from borrow_records where borrow_id = ?";
+        try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(getById))
+        {
+            preparedStatement.setInt(1,borrowId);
+            try( ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    Date returnDate = resultSet.getDate("return_date");
+                    LocalDate localReturnDate = (returnDate != null)
+                            ? returnDate.toLocalDate()
+                            : null;
+                    return new BorrowRecord(
+                            resultSet.getInt("borrow_id"),
+                            resultSet.getInt("book_id"),
+                            resultSet.getInt("member_id"),
+                            resultSet.getDate("borrow_date").toLocalDate(),
+                            resultSet.getDate("due_date").toLocalDate(),
+                            localReturnDate,
+                            resultSet.getString("status")
+                    );
+
+                }
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while retrieving borrow record: "+e.getMessage());
+        }
         return null;
     }
 
