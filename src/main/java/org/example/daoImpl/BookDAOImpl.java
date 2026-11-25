@@ -4,10 +4,7 @@ import org.example.dao.BookDAO;
 import org.example.database.DatabaseConnection;
 import org.example.model.Book;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,6 +111,18 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public boolean deleteBook(int bookId) {
+        String queryDelete ="Delete from books where book_id = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(queryDelete))
+        {
+            preparedStatement.setInt(1,bookId);
+            if(preparedStatement.executeUpdate()>0){
+                return true;
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while deleting: "+ e.getMessage());
+        }
         return false;
     }
 
