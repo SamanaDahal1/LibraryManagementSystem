@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MemberDAOImpl implements MemberDAO {
@@ -59,7 +60,27 @@ public class MemberDAOImpl implements MemberDAO {
 
     @Override
     public List<Member> getAllMembers() {
-        return List.of();
+        List<Member> members = new ArrayList<>();
+        String queryMember = "select * from members";
+        try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(queryMember);
+            ResultSet resultSet = preparedStatement.executeQuery())
+        {
+            while (resultSet.next()){
+                Member member = new Member(
+                        resultSet.getInt("member_id"),
+                        resultSet.getString("name"),
+                        resultSet.getString("email"),
+                        resultSet.getString("phone")
+                );
+                members.add(member);
+            }
+            return members;
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while retrieving all member: "+e.getMessage());
+        }
+        return members;
     }
 
     @Override
