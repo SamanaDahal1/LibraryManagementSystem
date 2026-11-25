@@ -103,6 +103,19 @@ public class BorrowDAOImpl implements BorrowDAO {
 
     @Override
     public boolean returnBook(int borrowId) {
+        String queryReturn = "update borrow_records set return_date=current_date, status = 'RETURNED' where borrow_id=?";
+        try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(queryReturn))
+        {
+            preparedStatement.setInt(1,borrowId);
+            int affect = preparedStatement.executeUpdate();
+            if(affect>0){
+                return true;
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while updating returned book date: "+ e.getMessage());
+        }
         return false;
     }
 
