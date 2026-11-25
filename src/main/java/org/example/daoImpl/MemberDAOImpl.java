@@ -106,6 +106,19 @@ public class MemberDAOImpl implements MemberDAO {
 
     @Override
     public boolean deleteMember(int memberId) {
+        String querydel = "delete from members where member_id = ?";
+        try(Connection connection =DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(querydel))
+        {
+            preparedStatement.setInt(1,memberId);
+            int affect= preparedStatement.executeUpdate();
+            if(affect>0){
+                return true;
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while deleting member: "+e.getMessage());
+        }
         return false;
     }
 
