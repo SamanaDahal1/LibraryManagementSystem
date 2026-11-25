@@ -128,6 +128,32 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public List<Book> searchBooks(String word) {
-        return List.of();
+        List<Book> books = new ArrayList<>();
+        String querySearch = "select * from books where title like ? or author like ?";
+        try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(querySearch))
+        {
+            preparedStatement.setString(1,"%"+word+"%");
+            preparedStatement.setString(2,"%"+word+"%");
+            try (ResultSet resultSet = preparedStatement.executeQuery()){
+                while ( resultSet.next()){
+                    Book book =  new Book(
+                            resultSet.getInt("book_id"),
+                            resultSet.getString("title"),
+                            resultSet.getString("author"),
+                            resultSet.getString("category"),
+                            resultSet.getInt("total_copies"),
+                            resultSet.getInt("available_copies")
+
+                    );
+                  books.add(book);
+                }
+                return books;
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while searching: "+e.getMessage());
+        }
+        return books;
     }
 }
