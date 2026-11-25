@@ -121,6 +121,36 @@ public class BorrowDAOImpl implements BorrowDAO {
 
     @Override
     public List<BorrowRecord> getBorrowRecordsByMemberId(int memberId) {
-        return List.of();
+        List<BorrowRecord> borrowRecords = new ArrayList<>();
+        String queryGetRecord = "select * from borrow_records where member_id =?";
+        try(Connection connection = DatabaseConnection.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(queryGetRecord))
+        {
+            preparedStatement.setInt(1,memberId);
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                while (resultSet.next()){
+                    Date returnDate = resultSet.getDate("return_date");
+                    LocalDate localReturnDate = (returnDate != null)
+                            ? returnDate.toLocalDate()
+                            : null;
+                    BorrowRecord borrowRecord = new BorrowRecord(
+                            resultSet.getInt("borrow_id"),
+                            resultSet.getInt("book_id"),
+                            resultSet.getInt("member_id"),
+                            resultSet.getDate("borrow_date").toLocalDate(),
+                            resultSet.getDate("due_date").toLocalDate(),
+                            localReturnDate,
+                            resultSet.getString("status")
+                    );
+                    borrowRecords.add(borrowRecord);
+                }
+                return borrowRecords;
+
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while retrieving borrow record of a member: "+e.getMessage());
+        }
+        return borrowRecords;
     }
 }
