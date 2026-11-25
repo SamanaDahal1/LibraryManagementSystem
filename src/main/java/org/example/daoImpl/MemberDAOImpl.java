@@ -85,7 +85,23 @@ public class MemberDAOImpl implements MemberDAO {
 
     @Override
     public boolean updateMember(Member member) {
-        return false;
+       String queryUpdate = "update members set name=?,email=?,phone=? where member_id = ?";
+       try (Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement= connection.prepareStatement(queryUpdate))
+       {
+           preparedStatement.setString(1,member.getName());
+           preparedStatement.setString(2, member.getEmail());
+           preparedStatement.setString(3, member.getPhone());
+           preparedStatement.setInt(4,member.getMemberId());
+           int affect = preparedStatement.executeUpdate();
+           if(affect>0){
+               return true;
+           }
+       }
+       catch (SQLException e){
+           System.out.println("Something went wrong while updating member: "+e.getMessage());
+       }
+       return false;
     }
 
     @Override
