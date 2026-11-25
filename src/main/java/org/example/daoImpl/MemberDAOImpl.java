@@ -8,6 +8,7 @@ import org.example.model.Member;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -34,7 +35,26 @@ public class MemberDAOImpl implements MemberDAO {
 
     @Override
     public Member getMemberById(int memberId) {
-        return null;
+       String queryGet = "select * from members where member_id = ?";
+       try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(queryGet))
+       {
+           preparedStatement.setInt(1,memberId);
+           try (ResultSet resultSet = preparedStatement.executeQuery()){
+               if(resultSet.next()){
+                   return new Member(
+                      resultSet.getInt("member_id"),
+                      resultSet.getString("name"),
+                      resultSet.getString("email"),
+                      resultSet.getString("phone")
+                   );
+               }
+           }
+       }
+       catch (SQLException e){
+           System.out.println("Something went wrong while retrieving member: "+e.getMessage());
+       }
+       return null;
     }
 
     @Override
