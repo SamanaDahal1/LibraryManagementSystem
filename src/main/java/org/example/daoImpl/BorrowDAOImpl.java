@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -70,7 +70,35 @@ public class BorrowDAOImpl implements BorrowDAO {
 
     @Override
     public List<BorrowRecord> getAllBorrowRecords() {
-        return List.of();
+        List<BorrowRecord> borrowRecords = new ArrayList<>();
+        String queryAllRecord = "select * from borrow_records";
+        try(Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(queryAllRecord);
+            ResultSet resultSet = preparedStatement.executeQuery())
+        {
+            while (resultSet.next()){
+                Date returnDate = resultSet.getDate("return_date");
+                LocalDate localReturnDate = (returnDate != null)
+                        ? returnDate.toLocalDate()
+                        : null;
+                BorrowRecord borrowRecord = new BorrowRecord(
+                        resultSet.getInt("borrow_id"),
+                        resultSet.getInt("book_id"),
+                        resultSet.getInt("member_id"),
+                        resultSet.getDate("borrow_date").toLocalDate(),
+                        resultSet.getDate("due_date").toLocalDate(),
+                        localReturnDate,
+                        resultSet.getString("status")
+                );
+                borrowRecords.add(borrowRecord);
+        }
+            return borrowRecords;
+
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while retrieving borrow record: "+ e.getMessage());
+        }
+        return borrowRecords;
     }
 
     @Override
