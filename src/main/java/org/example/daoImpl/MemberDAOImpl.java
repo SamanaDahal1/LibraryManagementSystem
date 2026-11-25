@@ -124,6 +124,25 @@ public class MemberDAOImpl implements MemberDAO {
 
     @Override
     public Member getMemberByEmail(String email) {
-        return null;
+        String queryGet = "select * from members where email = ?";
+        try (Connection connection = DatabaseConnection .getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(queryGet))
+        {
+            preparedStatement.setString(1,email);
+            try (ResultSet resultSet =preparedStatement.executeQuery()){
+                if(resultSet.next()){
+                    return new Member(
+                            resultSet.getInt("member_id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("email"),
+                            resultSet.getString("phone")
+                    );
+                }
+            }
+        }
+        catch (SQLException e){
+            System.out.println("Something went wrong while searching for member by email: "+e.getMessage());
+        }
+        return  null;
     }
 }
